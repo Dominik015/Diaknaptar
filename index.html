@@ -37,3 +37,58 @@
       <button class="btn icon" id="nextW" type="button" aria-label="Következő hét">→</button>
     </div>
   </div>
+
+  <main class="board" id="board"></main>
+
+  <p class="foot" id="foot">Az emlékeztető akkor szól, amikor a Diáknaptár nyitva van a böngészőben. Az adatok csak ezen az eszközön, ebben a böngészőben maradnak meg.</p>
+</div>
+
+<dialog id="dlg">
+  <form id="form" method="dialog">
+    <h3 id="dlgTitle">Új esemény</h3>
+    <div class="field"><label for="fTitle">Megnevezés</label><input id="fTitle" type="text" maxlength="80" placeholder="pl. Matematika dolgozat" autocomplete="off"></div>
+    <div class="row">
+      <div class="field"><label for="fDate">Nap</label><input id="fDate" type="date"></div>
+      <div class="field"><label for="fCat">Fajta</label>
+        <select id="fCat">
+          <option value="class">Tanóra</option>
+          <option value="home">Házi feladat / tanulás</option>
+          <option value="exam">Dolgozat / vizsga</option>
+          <option value="sport">Sport / különóra</option>
+          <option value="other">Egyéb</option>
+        </select></div>
+    </div>
+    <div class="row">
+      <div class="field"><label for="fStart">Kezdés</label><input id="fStart" type="time"></div>
+      <div class="field"><label for="fEnd">Vége</label><input id="fEnd" type="time"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label for="fRemind">Emlékeztető</label>
+        <select id="fRemind">
+          <option value="-1">Nincs</option>
+          <option value="0">A kezdéskor</option>
+          <option value="5">5 perccel előtte</option>
+          <option value="10">10 perccel előtte</option>
+          <option value="15">15 perccel előtte</option>
+          <option value="30">30 perccel előtte</option>
+          <option value="60">1 órával előtte</option>
+        </select></div>
+      <div class="field"><label for="fRepeat">Ismétlés</label>
+        <select id="fRepeat"><option value="none">Egyszeri</option><option value="weekly">Minden héten</option></select></div>
+    </div>
+    <p class="err" id="err" role="alert"></p>
+    <div class="formactions">
+      <button class="btn danger" id="delBtn" type="button" hidden>Törlés</button>
+      <div class="right">
+        <button class="btn" id="cancelBtn" type="button">Mégse</button>
+        <button class="btn primary" id="saveBtn" type="submit">Mentés</button>
+      </div>
+    </div>
+  </form>
+</dialog>
+
+<div class="toasts" id="toasts" aria-live="assertive"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
