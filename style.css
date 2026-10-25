@@ -1,0 +1,34 @@
+html { color-scheme: light; }
+body { margin: 0; }
+[hidden] { display: none !important; }
+
+/* Layout: sticky toolbar on top, "next up" strip, then a 7-column week board that stacks on phones. */
+:root {
+  --bg: #f3f5f9;
+  --surface: #ffffff;
+  --surface-2: #eaeef5;
+  --line: #d9dfeb;
+  --fg: #151a2b;
+  --muted: #5a6479;
+  --accent: #2446d6;
+  --accent-fg: #ffffff;
+  --accent-soft: #e3e9ff;
+  --danger: #b42318;
+  --c-class: #2446d6;
+  --c-home: #b7791f;
+  --c-exam: #c2331f;
+  --c-sport: #1f8a5b;
+  --c-other: #7c4dbd;
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1320; --surface: #181e31; --surface-2: #212940; --line: #2b3450;
+    --fg: #e8ecf8; --muted: #9aa5c3; --accent: #7d96ff; --accent-fg: #0f1320; --accent-soft: #23305f;
+    --danger: #ff8a7a;
+    --c-class: #7d96ff; --c-home: #e8b04a; --c-exam: #ff8272; --c-sport: #4fd197; --c-other: #b790f0;
+    color-scheme: dark;
+  }
+}

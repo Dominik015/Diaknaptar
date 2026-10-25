@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Diáknaptár</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1>Diáknaptár</h1>
+      <span>Heti órarend és teendők, időben jelző emlékeztetővel</span>
+    </div>
+    <div class="actions">
+      <button class="btn" id="notifBtn" type="button">Értesítések bekapcsolása</button>
+      <button class="btn primary" id="newBtn" type="button">+ Új esemény</button>
+    </div>
+  </header>
+
+  <section class="next" id="next" aria-live="polite"></section>
+
+  <div class="notice" id="sampleNotice" hidden>
+    <p>A hét mintaadatokkal van kitöltve, hogy lásd, hogyan működik. Töröld őket, és írd be a saját programodat.</p>
+    <button class="btn" id="clearSample" type="button">Mintaadatok törlése</button>
+  </div>
+
+  <div class="weekbar">
+    <h2 id="weekLabel"></h2>
+    <div class="nav">
+      <button class="btn icon" id="prev" type="button" aria-label="Előző hét">←</button>
+      <button class="btn" id="todayBtn" type="button">Ez a hét</button>
+      <button class="btn icon" id="nextW" type="button" aria-label="Következő hét">→</button>
+    </div>
+  </div>
