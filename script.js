@@ -59,3 +59,58 @@
     state.sample = true;
     save();
   }
+
+   /* ---------- render ---------- */
+  function fmtDay(d) { return MONTHS[d.getMonth()] + ' ' + d.getDate() + '.'; }
+
+  function render() {
+    var board = document.getElementById('board');
+    var today = ds(new Date());
+    var html = '';
+    for (var i = 0; i < 7; i++) {
+      var d = addDays(weekStart, i), day = ds(d);
+      var evs = dayEvents(day);
+      var cls = 'day' + (day === today ? ' today' : '') + (day < today ? ' past' : '');
+      html += '<section class="' + cls + '"><div class="dayhead"><div><div class="name">' + DAYS[i] + '</div><div class="date">' + fmtDay(d) + '</div></div>' +
+        '<button class="addday" type="button" data-add="' + day + '" aria-label="Esemény hozzáadása: ' + DAYS[i] + '">+</button></div><div class="events">';
+      if (!evs.length) html += '<div class="empty">Nincs program.</div>';
+      evs.forEach(function (e) {
+        html += '<button type="button" class="ev cat-' + e.cat + '" data-edit="' + e.id + '" data-day="' + day + '">' +
+          '<span class="t">' + e.start + '–' + e.end +
+          (e.remind >= 0 ? '<span class="badge">' + (e.remind === 0 ? 'jelzés: kezdéskor' : 'jelzés: ' + (e.remind === 60 ? '1 óra' : e.remind + ' perc')) + '</span>' : '') +
+          (e.repeat === 'weekly' ? '<span class="badge">heti</span>' : '') + '</span>' +
+          '<span class="n">' + esc(e.title) + '</span>' +
+          '<span class="c"><i class="dot"></i>' + CATS[e.cat] + '</span></button>';
+      });
+      html += '</div></section>';
+    }
+    board.innerHTML = html;
+    var end = addDays(weekStart, 6);
+    document.getElementById('weekLabel').textContent = weekStart.getFullYear() + '. ' + fmtDay(weekStart) + ' – ' + fmtDay(end);
+    document.getElementById('sampleNotice').hidden = !state.sample;
+    renderNext();
+  }
+
+  function nextOccurrence() {
+    var now = new Date();
+    for (var i = 0; i < 15; i++) {
+      var day = ds(addDays(now, i));
+      var evs = dayEvents(day);
+      for (var j = 0; j < evs.length; j++) {
+        var s = at(day, evs[j].start), e = endOf(evs[j], day);
+        if (e > now) return { ev: evs[j], start: s, end: e, day: day };
+      }
+    }
+    return null;
+  }
+  function renderNext() {
+    var el = document.getElementById('next');
+    var n = nextOccurrence();
+    if (!n) { el.innerHTML = '<span class="lbl">Következő</span><strong>Nincs közelgő program</strong>'; return; }
+    var now = new Date(), mins = Math.round((n.start - now) / 60000), when;
+    if (mins <= 0) when = 'most zajlik, vége ' + pad(n.end.getHours()) + ':' + pad(n.end.getMinutes()) + '-kor';
+    else if (mins < 60) when = mins + ' perc múlva';
+    else if (mins < 24 * 60) when = Math.floor(mins / 60) + ' óra ' + (mins % 60) + ' perc múlva';
+    else when = DAYS[(parseDay(n.day).getDay() + 6) % 7].toLowerCase() + ' ' + n.ev.start;
+    el.innerHTML = '<span class="lbl">Következő</span><strong>' + esc(n.ev.title) + '</strong><span class="when">' + n.ev.start + ' · ' + when + '</span>';
+  }
