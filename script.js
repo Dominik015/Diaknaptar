@@ -114,3 +114,64 @@
     else when = DAYS[(parseDay(n.day).getDay() + 6) % 7].toLowerCase() + ' ' + n.ev.start;
     el.innerHTML = '<span class="lbl">Következő</span><strong>' + esc(n.ev.title) + '</strong><span class="when">' + n.ev.start + ' · ' + when + '</span>';
   }
+
+  /* ---------- dialog ---------- */
+  var dlg = document.getElementById('dlg');
+  var f = {
+    title: document.getElementById('fTitle'), date: document.getElementById('fDate'), cat: document.getElementById('fCat'),
+    start: document.getElementById('fStart'), end: document.getElementById('fEnd'), remind: document.getElementById('fRemind'),
+    repeat: document.getElementById('fRepeat'), err: document.getElementById('err'), del: document.getElementById('delBtn')
+  };
+  var delArmed = false;
+  function openDialog(ev, day) {
+    editingId = ev ? ev.id : null;
+    delArmed = false;
+    document.getElementById('dlgTitle').textContent = ev ? 'Esemény szerkesztése' : 'Új esemény';
+    f.title.value = ev ? ev.title : '';
+    f.date.value = ev ? ev.date : (day || ds(new Date()));
+    f.cat.value = ev ? ev.cat : 'class';
+    f.start.value = ev ? ev.start : '08:00';
+    f.end.value = ev ? ev.end : '08:45';
+    f.remind.value = String(ev ? ev.remind : 10);
+    f.repeat.value = ev ? ev.repeat : 'none';
+    f.err.textContent = '';
+    f.del.hidden = !ev;
+    f.del.textContent = ev && ev.repeat === 'weekly' ? 'Törlés (minden alkalom)' : 'Törlés';
+    if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
+    f.title.focus();
+  }
+  function closeDialog() { if (dlg.close) dlg.close(); else dlg.removeAttribute('open'); }
+
+  f.start.addEventListener('change', function () {
+    if (!f.start.value) return;
+    if (!f.end.value || f.end.value <= f.start.value) {
+      var p = f.start.value.split(':'), t = +p[0] * 60 + +p[1] + 45;
+      if (t < 24 * 60) f.end.value = pad(Math.floor(t / 60)) + ':' + pad(t % 60);
+    }
+  });
+
+  document.getElementById('form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var title = f.title.value.trim();
+    if (!title) { f.err.textContent = 'Írd be az esemény nevét.'; f.title.focus(); return; }
+    if (!f.date.value) { f.err.textContent = 'Válassz napot.'; return; }
+    if (!f.start.value || !f.end.value) { f.err.textContent = 'Add meg a kezdés és a vége időpontját.'; return; }
+    if (f.end.value <= f.start.value) { f.err.textContent = 'A végének későbbinek kell lennie, mint a kezdés.'; return; }
+    var data = { title: title, date: f.date.value, start: f.start.value, end: f.end.value, cat: f.cat.value, remind: +f.remind.value, repeat: f.repeat.value };
+    if (editingId) {
+      state.events = state.events.map(function (x) { if (x.id !== editingId) return x; data.id = x.id; data.sample = x.sample; return data; });
+      clearFired(editingId);
+    } else { data.id = uid(); state.events.push(data); }
+    save(); closeDialog();
+    weekStart = mondayOf(parseDay(data.date));
+    render(); check();
+  });
+  document.getElementById('cancelBtn').addEventListener('click', closeDialog);
+  f.del.addEventListener('click', function () {
+    if (!delArmed) { delArmed = true; f.del.textContent = 'Biztosan törlöd?'; return; }
+    state.events = state.events.filter(function (x) { return x.id !== editingId; });
+    clearFired(editingId);
+    if (!state.events.some(function (x) { return x.sample; })) state.sample = false;
+    save(); closeDialog(); render();
+  });
+  function clearFired(id) { Object.keys(state.fired).forEach(function (k) { if (k.indexOf(id + '|') === 0) delete state.fired[k]; }); }
