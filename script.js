@@ -194,3 +194,75 @@
     state.events = state.events.filter(function (x) { return !x.sample; });
     state.sample = false; save(); render();
   });
+
+  /* ---------- reminders ---------- */
+  function unlockAudio() {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+    } catch (e) {}
+  }
+  function beep() {
+    try {
+      if (!audioCtx) return;
+      [0, 0.28].forEach(function (t) {
+        var o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.type = 'sine'; o.frequency.value = 880; o.connect(g); g.connect(audioCtx.destination);
+        var s = audioCtx.currentTime + t;
+        g.gain.setValueAtTime(0.0001, s); g.gain.exponentialRampToValueAtTime(0.25, s + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, s + 0.22);
+        o.start(s); o.stop(s + 0.25);
+      });
+    } catch (e) {}
+  }
+  document.addEventListener('click', unlockAudio, { once: true });
+
+  function showToast(title, detail) {
+    var box = document.getElementById('toasts');
+    var t = document.createElement('div');
+    t.className = 'toast';
+    t.innerHTML = '<b>' + esc(title) + '</b><small>' + esc(detail) + '</small><button type="button">Rendben</button>';
+    t.querySelector('button').addEventListener('click', function () { t.remove(); });
+    box.appendChild(t);
+  }
+  function fire(ev, start) {
+    var now = new Date(), mins = Math.ceil((start - now) / 60000);
+    var detail = mins > 0 ? mins + ' perc múlva kezdődik (' + ev.start + ')' : 'Most kezdődik (' + ev.start + ')';
+    showToast(ev.title, detail);
+    beep();
+    try {
+      if ('Notification' in window && Notification.permission === 'granted') new Notification(ev.title, { body: detail });
+    } catch (e) {}
+  }
+  function check() {
+    var now = new Date(), changed = false;
+    for (var i = 0; i < 2; i++) {
+      var day = ds(addDays(now, i));
+      dayEvents(day).forEach(function (ev) {
+        if (ev.remind < 0) return;
+        var key = ev.id + '|' + day;
+        if (state.fired[key]) return;
+        var start = at(day, ev.start), trigger = new Date(start.getTime() - ev.remind * 60000);
+        if (now >= trigger && now < endOf(ev, day)) { state.fired[key] = 1; changed = true; fire(ev, start); }
+      });
+    }
+    if (changed) save();
+    renderNext();
+  }
+
+  var nb = document.getElementById('notifBtn');
+  function notifLabel() {
+    if (!('Notification' in window)) { nb.textContent = 'Hangjelzés bekapcsolva'; return; }
+    if (Notification.permission === 'granted') nb.textContent = 'Értesítések be vannak kapcsolva';
+    else if (Notification.permission === 'denied') nb.textContent = 'Értesítés tiltva (csak oldalon belüli jelzés)';
+    else nb.textContent = 'Értesítések bekapcsolása';
+  }
+  nb.addEventListener('click', function () {
+    unlockAudio(); beep();
+    try {
+      if ('Notification' in window && Notification.permission === 'default') {
+        var p = Notification.requestPermission(function () { notifLabel(); });
+        if (p && p.then) p.then(notifLabel, notifLabel);
+      }
+    } catch (e) {}
+    notifLabel();
+  });
