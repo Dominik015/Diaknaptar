@@ -175,3 +175,22 @@
     save(); closeDialog(); render();
   });
   function clearFired(id) { Object.keys(state.fired).forEach(function (k) { if (k.indexOf(id + '|') === 0) delete state.fired[k]; }); }
+
+  
+  /* ---------- clicks ---------- */
+  document.getElementById('board').addEventListener('click', function (e) {
+    var add = e.target.closest('[data-add]'); if (add) { openDialog(null, add.getAttribute('data-add')); return; }
+    var ed = e.target.closest('[data-edit]');
+    if (ed) { var id = ed.getAttribute('data-edit'); var ev = state.events.filter(function (x) { return x.id === id; })[0]; if (ev) openDialog(ev); }
+  });
+  document.getElementById('newBtn').addEventListener('click', function () {
+    var today = ds(new Date()), wk = ds(weekStart);
+    openDialog(null, dayDiff(wk, today) >= 0 && dayDiff(wk, today) < 7 ? today : wk);
+  });
+  document.getElementById('prev').addEventListener('click', function () { weekStart = addDays(weekStart, -7); render(); });
+  document.getElementById('nextW').addEventListener('click', function () { weekStart = addDays(weekStart, 7); render(); });
+  document.getElementById('todayBtn').addEventListener('click', function () { weekStart = mondayOf(new Date()); render(); });
+  document.getElementById('clearSample').addEventListener('click', function () {
+    state.events = state.events.filter(function (x) { return !x.sample; });
+    state.sample = false; save(); render();
+  });
