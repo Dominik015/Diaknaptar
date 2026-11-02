@@ -266,3 +266,12 @@
     } catch (e) {}
     notifLabel();
   });
+
+  /* ---------- start ---------- */
+  if (!load()) seed();
+  notifLabel();
+  render();
+  check();
+  setInterval(check, 15000);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) { check(); } });
+})();
